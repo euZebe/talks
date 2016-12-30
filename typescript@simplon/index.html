@@ -1,0 +1,328 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>reveal.js</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/night.css">
+		<link rel="stylesheet" href="css/custom.css">
+
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+<section>
+	<h2> Introduction à TypeScript</h2>
+	<p class="right">
+		Jean Martineau-Figuette
+		<br>Simplon, Labège
+		<br>12 janvier 2017
+	</p>
+</section>
+
+<!-- ----------
+	 sommaire
+     ---------- -->
+
+<section>
+	<h2> Sommaire</h2>
+	<ul>
+		<li>à propos de moi</li>
+		<ul>
+			<li>Qui suis-je ? Que fais-je ?</li>
+			<li>Mon rapport au métier de développeur</li>
+		</ul>
+		<li> TypeScript</li>
+	<ul>
+</section>
+
+<!-- ----------
+	 about me
+     ---------- -->
+
+<section>
+	<section>
+		<h2>Qui suis-je ? Que fais-je ?</h2>
+		<p class="left">Développeur Java depuis 2004, mais aussi</p>
+		<ul>
+			<li>chef de projet</li>
+			<li>enseignant</li>
+			<li>développeur web et mobile pour des projets persos</li>
+		</ul>
+	</section>
+	<section>
+		<h2>Pour qui ?</h2>
+		<ul>
+			<li>mes employeurs: SSII vs éditeur</li>
+			<li>projets personnels</li>
+			<ul>
+				<li><a href="http://mele-eusebe.rhcloud.com">meLe</a> (AngularJS + express)</li>
+				<li>Score: appli mobile hybride (Ionic, Angular)</li>
+			</ul>
+		</ul>
+		<aside class="notes">
+			artware (SSII), MiPih (éditeur), année sabbatique, Celad (SSII)
+			<br>
+			expliquer le fonctionnement des SSII (missions / régie)
+			<br>
+			Angular: framework Google, dev d'applis web / mobiles
+		</aside>
+	</section>
+	<section>
+
+	<h2>mon rapport au métier de développeur</h2>
+	<ul>
+		<li>mon métier par <strong>choix</strong></li>
+		<li>de l'importance de se tenir à jour</li>
+		<li>dépasser le syndrome de l'imposteur</li>
+	</ul>
+
+		<aside class="notes">
+	- ++ au quotidien: le défi intellectuel quotidien
+	- l'esprit de groupe
+	- approfondissement des méthodos de développement
+	- veille techno
+	- projets persos pour explorer ce qu'on n'aborde pas professionnellement
+	- meetups pour se tenir au courant et développer un réseau
+		</aside>
+	</section>
+</section>
+
+
+<!-- ----------
+	 TypeScript
+     ---------- -->
+
+<section>
+	<section>
+		<h2>TypeScript: qu'est-ce ?</h2>
+		<ul>
+			<li>surensemble de javascript</li>
+			<li>fortement typé</li>
+			<li>le langage de prédilection pour faire de l'Angular</li>
+		</ul>
+
+		<aside class="notes">
+	- surensemble: du code purement JS fonctionne en TypeScript
+		</aside>
+	</section>
+
+	<section>
+		<h2>Comment ça marche ?</h2>
+		<p>
+			vérification de type à la compilation. Exemple:
+			<pre><code>
+function sayHello(person: string) {
+    return "Hello, " + person;
+}
+
+var user = [0, 1, 2];
+
+document.body.innerHTML = sayHello(user);
+			</code></pre>
+			<pre><code>
+sayHello.ts(7,26): Supplied parameters do not match any signature of call target				
+			</code></pre>
+		</p>
+
+
+		bénéfice: erreurs détectées à l'écriture du code, pas à l'exécution
+	</section>
+
+
+
+
+
+
+	<section>
+		<h2>Qu'apporte TypeScript ?</h2>
+	</section>
+	<section>
+		<h2>les types primitifs</h2>
+		<pre>
+			<code>
+let isDone: boolean = false;
+let decimal: number = 6;
+let hex: number = 0xf00d;
+let binary: number = 0b1010;
+let name: string = "Niobé";
+const list: Array&lt;number> = [1, 2, 42];
+			</code>
+		</pre>
+			Note: Banissez <del><code>var</code></del> !!<br>
+			Préférez <code>const</code>, ou <code>let</code> quand c'est nécessaire.
+
+	</section>
+
+	<section>
+		<h2>les enums</h2>
+		une liste finie de valeurs possibles:
+		<pre>
+			<code>
+enum EtatCommande {
+	EN_ATTENTE_FACTURATION,
+	EN_PREPARATION, 
+	PREPAREE, 
+	REMISE_AU_TRANSPORTEUR,
+	DISPONIBLE_EN_RELAIS_COLIS,
+	RECUPEREE_PAR_LE_CLIENT
+}
+
+let etatCommandeCourante = EN_PREPARATION;			
+			</code>
+		</pre>
+	</section>
+
+	<section>
+		<h2>et aussi...</h2>
+		<pre>
+			<code>
+// any
+let list: any[] = [1, true, "free"]; 
+
+// le typage de retour de fonction
+
+function warnUser(): void { // returns nothing
+    alert("This is my warning message");
+}
+
+function getGreatest(number a, number b): number { // returns a number
+	return a > b ? a : b;
+}
+			</code>
+		</pre>
+	</section>
+
+
+	<section>
+		<h2>les classes</h2>
+		<h4>(en fait, proposé par ES6)</h4>
+		<img data-src="assets/instantiateObject.png">		
+	</section>
+	<section>
+		<img data-src="assets/content-assist.png">
+		<aside class="notes">
+			<pre>
+				instanciation
+				content assist
+			</pre>
+		</aside>
+	</section>
+	<section>
+		<pre><code data-trim data-noescape style="max-height: 640px">
+import {Question} from './question';
+import {Answer} from './answer';
+
+export class Topic {
+
+    question: Question;
+    answers: Answer[];
+
+    constructor() {
+        this.answers = [];
+    }
+
+    setBest(bestAnswer: Answer) {
+        this.answers.forEach(this.markAsBest, bestAnswer);
+    }
+
+    private markAsBest(anyAnswer: any) {
+        anyAnswer.isBest = anyAnswer === this;
+    }
+
+    getBestAnswer(): Answer {
+        const bestAnswers = this.answers.filter(answer => answer.isBest);
+        return bestAnswers.length > 0 ? bestAnswers[0] : null;
+    }
+}
+
+		</code></pre>
+	</section>
+
+	<section>
+		<h2>l'héritage</h2>
+		existe déjà 
+	</section>
+
+</section>
+
+<!-- ----------
+	 Comment en fait-on ?
+     ---------- -->
+
+<section>
+	<section>
+		<h2>How to</h2>
+		<ul>
+			<li>installer nodeJS</li>
+			<li>
+				<code>
+npm install -g typescript
+				</code>
+			</li>
+			<li>exécuter <code>
+tsc monFichier.ts
+				</code>
+			</li>
+
+	</section>
+	<section>
+		<h2>Quel IDE ?</h2>
+		Sublime / Atom / VS Code / WebStorm (payant)... tous proposent des plugins pour typescript (import de types, auto-complétion et content assist...)
+		
+	</section>
+</section>
+
+<!-- ----------
+	 related links
+     ---------- -->
+
+<section>
+	<h4>related links</h4>
+	<a href="https://github.com/euZebe/talks/tree/master/typescript%40simplon">https://github.com/euZebe/talks/tree/master/typescript%40simplon</a>
+	<a href="https://www.typescriptlang.org/docs/tutorial.html">https://www.typescriptlang.org/docs/tutorial.html</a>
+	Le bac à sable<a href="https://www.typescriptlang.org/play/index.html">https://www.typescriptlang.org/play/index.html</a>
+</section>
+
+<!-- ----------
+	 end
+     ---------- -->
+
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				history: true,
+
+				// More info https://github.com/hakimel/reveal.js#dependencies
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>
