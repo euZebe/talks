@@ -28,7 +28,7 @@
 			<div class="slides">
 
 <section>
-	<h2> Introduction à TypeScript</h2>
+	## Introduction à TypeScript
 	<p class="right">
 		Jean Martineau-Figuette
 		<br>Simplon, Labège
@@ -40,16 +40,13 @@
 	 sommaire
      ---------- -->
 
-<section>
-	<h2> Sommaire</h2>
-	<ul>
-		<li>à propos de moi</li>
-		<ul>
-			<li>Qui suis-je ? Que fais-je ?</li>
-			<li>Mon rapport au métier de développeur</li>
-		</ul>
-		<li> TypeScript</li>
-	<ul>
+<section data-markdown>
+		## Sommaire
+
+		* à propos de moi
+			* Qui suis-je ? Que fais-je ?
+			* Mon rapport au métier de développeur
+		* TypeScript
 </section>
 
 <!-- ----------
@@ -57,25 +54,22 @@
      ---------- -->
 
 <section>
-	<section>
-		<h2>Qui suis-je ? Que fais-je ?</h2>
-		<p class="left">Développeur Java depuis 2004, mais aussi</p>
-		<ul>
-			<li>chef de projet</li>
-			<li>enseignant</li>
-			<li>développeur web et mobile pour des projets persos</li>
-		</ul>
+	<section data-markdown>
+		## Qui suis-je ? Que fais-je ?
+		Développeur Java depuis 2004, mais aussi
+		* chef de projet
+		* enseignant
+		* développeur web et mobile pour des projets persos
 	</section>
-	<section>
-		<h2>Pour qui ?</h2>
-		<ul>
-			<li>mes employeurs: SSII vs éditeur</li>
-			<li>projets personnels</li>
-			<ul>
-				<li><a href="http://mele-eusebe.rhcloud.com">meLe</a> (AngularJS + express)</li>
-				<li>Score: appli mobile hybride (Ionic, Angular)</li>
-			</ul>
-		</ul>
+	<section data-markdown>
+		<script type="text/template">
+		## Pour qui ?
+		* mes employeurs: SSII vs éditeur
+		* projets personnels
+			* [meLe](http://mele-eusebe.rhcloud.com) (AngularJS + express)
+			* Score: appli mobile hybride (Ionic, Angular)
+		</script
+		
 		<aside class="notes">
 			artware (SSII), MiPih (éditeur), année sabbatique, Celad (SSII)
 			<br>
@@ -84,14 +78,12 @@
 			Angular: framework Google, dev d'applis web / mobiles
 		</aside>
 	</section>
-	<section>
-
-	<h2>mon rapport au métier de développeur</h2>
-	<ul>
-		<li>mon métier par <strong>choix</strong></li>
-		<li>de l'importance de se tenir à jour</li>
-		<li>dépasser le syndrome de l'imposteur</li>
-	</ul>
+	<section data-markdown>
+	## mon rapport au métier de développeur
+	* mon métier par <strong>choix</strong>
+	* de l'importance de se tenir à jour
+	* dépasser le syndrome de l'imposteur
+	
 
 		<aside class="notes">
 	- ++ au quotidien: le défi intellectuel quotidien
@@ -110,24 +102,19 @@
      ---------- -->
 
 <section>
-	<section>
-		<h2>TypeScript: qu'est-ce ?</h2>
-		<ul>
-			<li>surensemble de javascript</li>
-			<li>fortement typé</li>
-			<li>le langage de prédilection pour faire de l'Angular</li>
-		</ul>
-
-		<aside class="notes">
-	- surensemble: du code purement JS fonctionne en TypeScript
-		</aside>
+	<section data-markdown>
+		##TypeScript: qu'est-ce ?
+		* surensemble de javascript
+		* fortement typé
+		* le langage de prédilection pour faire de l'Angular
+		
+		Note: surensemble: du code purement JS fonctionne en TypeScript
 	</section>
 
-	<section>
-		<h2>Comment ça marche ?</h2>
-		<p>
-			vérification de type à la compilation. Exemple:
-			<pre><code>
+	<section data-markdown>
+		##Comment ça marche ?
+		vérification de type à la compilation. Exemple:
+```
 function sayHello(person: string) {
     return "Hello, " + person;
 }
@@ -135,12 +122,10 @@ function sayHello(person: string) {
 var user = [0, 1, 2];
 
 document.body.innerHTML = sayHello(user);
-			</code></pre>
-			<pre><code>
+```
+```
 sayHello.ts(7,26): Supplied parameters do not match any signature of call target				
-			</code></pre>
-		</p>
-
+```
 
 		bénéfice: erreurs détectées à l'écriture du code, pas à l'exécution
 	</section>
@@ -150,70 +135,66 @@ sayHello.ts(7,26): Supplied parameters do not match any signature of call target
 
 
 
-	<section>
-		<h2>Qu'apporte TypeScript ?</h2>
+	<section data-markdown>
+		##Qu'apporte TypeScript ?
 	</section>
-	<section>
-		<h2>les types primitifs</h2>
-		<pre>
-			<code>
-let isDone: boolean = false;
-let decimal: number = 6;
-let hex: number = 0xf00d;
-let binary: number = 0b1010;
-let name: string = "Niobé";
-const list: Array&lt;number> = [1, 2, 42];
-			</code>
-		</pre>
-			Note: Banissez <del><code>var</code></del> !!<br>
-			Préférez <code>const</code>, ou <code>let</code> quand c'est nécessaire.
+	<section data-markdown>
+		##les types primitifs
+		```
+		let isDone: boolean = false;
+		let decimal: number = 6;
+		const hex: number = 0xf00d;
+		let binary: number = 0b1010;
+		let name: string = "Niobé";
+		const list: Array&lt;number> = [1, 2, 42];
+		```
+		Notes: Banissez ~~var~~ !!
+		
+		Préférez __const__, ou __let__ quand c'est nécessaire.
 
 	</section>
 
-	<section>
-		<h2>les enums</h2>
+	<section data-markdown>
+		##les enums
 		une liste finie de valeurs possibles:
-		<pre>
-			<code>
-enum EtatCommande {
-	EN_ATTENTE_FACTURATION,
-	EN_PREPARATION, 
-	PREPAREE, 
-	REMISE_AU_TRANSPORTEUR,
-	DISPONIBLE_EN_RELAIS_COLIS,
-	RECUPEREE_PAR_LE_CLIENT
-}
-
-let etatCommandeCourante = EN_PREPARATION;			
-			</code>
-		</pre>
+		```
+		enum EtatCommande {
+			EN_ATTENTE_FACTURATION,
+			EN_PREPARATION, 
+			PREPAREE, 
+			REMISE_AU_TRANSPORTEUR,
+			DISPONIBLE_EN_RELAIS_COLIS,
+			RECUPEREE_PAR_LE_CLIENT
+		}
+	
+		let etatCommandeCourante = EN_PREPARATION;			
+		```
 	</section>
 
-	<section>
-		<h2>et aussi...</h2>
-		<pre>
-			<code>
-// any
-let list: any[] = [1, true, "free"]; 
+	<section data-markdown>
+		##et aussi...
+		```
+		// any
+		let list: any[] = [1, true, "free"]; 
 
-// le typage de retour de fonction
+		// le typage de retour de fonction
 
-function warnUser(): void { // returns nothing
-    alert("This is my warning message");
-}
+		function warnUser(): void { // returns nothing
+			alert("This is my warning message");
+		}
 
-function getGreatest(number a, number b): number { // returns a number
-	return a > b ? a : b;
-}
-			</code>
-		</pre>
+		function getGreatest(number a, number b): number { // returns a number
+			return a > b ? a : b;
+		}
+		```
 	</section>
 
 
-	<section>
-		<h2>les classes</h2>
-		<h4>(en fait, proposé par ES6)</h4>
-		<img data-src="assets/instantiateObject.png">		
+	<section data-markdown>
+		##les classes
+		(en fait, proposé par ES6)
+		
+		![instanciate](assets/instantiateObject.png)
 	</section>
 	<section>
 		<img data-src="assets/content-assist.png">
@@ -224,8 +205,8 @@ function getGreatest(number a, number b): number { // returns a number
 			</pre>
 		</aside>
 	</section>
-	<section>
-		<pre><code data-trim data-noescape style="max-height: 640px">
+	<section data-markdown>
+```
 import {Question} from './question';
 import {Answer} from './answer';
 
@@ -251,13 +232,15 @@ export class Topic {
         return bestAnswers.length > 0 ? bestAnswers[0] : null;
     }
 }
-
+```
 		</code></pre>
 	</section>
 
-	<section>
-		<h2>l'héritage</h2>
+	<section data-markdown>
+		##l'héritage
 		existe déjà 
+
+		TODO
 	</section>
 
 </section>
@@ -267,23 +250,24 @@ export class Topic {
      ---------- -->
 
 <section>
-	<section>
-		<h2>How to</h2>
-		<ul>
-			<li>installer nodeJS</li>
-			<li>
-				<code>
-npm install -g typescript
-				</code>
-			</li>
-			<li>exécuter <code>
-tsc monFichier.ts
-				</code>
-			</li>
+	<section data-markdown>
+		##How to
+		* installer nodeJS
+		* installer typescript
+
+		```
+		npm install -g typescript
+		```
+		* compiler
+
+		```
+		tsc monFichier.ts
+		```
+			
 
 	</section>
-	<section>
-		<h2>Quel IDE ?</h2>
+	<section data-markdown>
+		##Quel IDE ?
 		Sublime / Atom / VS Code / WebStorm (payant)... tous proposent des plugins pour typescript (import de types, auto-complétion et content assist...)
 		
 	</section>
@@ -293,7 +277,7 @@ tsc monFichier.ts
 	 related links
      ---------- -->
 
-<section>
+<section data-markdown>
 	<h4>related links</h4>
 	<a href="https://github.com/euZebe/talks/tree/master/typescript%40simplon">https://github.com/euZebe/talks/tree/master/typescript%40simplon</a>
 	<a href="https://www.typescriptlang.org/docs/tutorial.html">https://www.typescriptlang.org/docs/tutorial.html</a>
