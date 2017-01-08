@@ -116,7 +116,7 @@
 
 		vérification de type à la compilation. Exemple:
 ```
-function sayHello(person: string) {
+function sayHello(person: String) {
     return "Hello, " + person;
 }
 
@@ -197,15 +197,6 @@ sayHello.ts(7,26): Supplied parameters do not match any signature of call target
 		
 		![instanciate](assets/instantiateObject.png)
 	</section>
-	<section>
-		<img data-src="assets/content-assist.png">
-		<aside class="notes">
-			<pre>
-				instanciation
-				content assist
-			</pre>
-		</aside>
-	</section>
 	<section data-markdown>
 ```
 import {Question} from './question';
@@ -239,9 +230,31 @@ export class Topic {
 
 	<section data-markdown>
 		##l'héritage
-		existe déjà 
+```
+export class Personne {
+    constructor(public prenom: String, public nom: String) { }
+    toString(): String {
+        return this.prenom + " " + this.nom;
+    }
+}
 
-		TODO
+
+
+export class SuperHeros extends Personne {
+    constructor(public prenom:String, public nom:String, public superPouvoir: String) {
+        super(prenom, nom);
+    }
+    toString(): String {
+        return super.toString() + " [" + this.superPouvoir + "]";
+    }
+}
+
+const heros = new SuperHeros("Peter", "Parker", "toile d'araignée");
+console.log(heros.toString()); // => Peter Parker [toile d'araignée]
+```
+
+		Note:
+		intérêt: factorisation de comportement / attribut entre plusieurs entités ressemblantes
 	</section>
 
 </section>
@@ -278,7 +291,30 @@ export class Topic {
 		Note:
 		 IDE = Integrated Development Environment
 	</section>
+	<section data-markdown>
+		## Exemple d'assistance proposée par les IDE
+		
+		![instanciate](assets/instantiateObject.png)
+		Note: identification d'erreurs à la compilation
+	</section>
+	<section data-markdown>
+		## Assistant à la saisie
+		![](assets/content-assist.png)
+
+		Note:
+		content assist
+		</aside>
+	</section>
+
 </section>
+
+<section data-markdown>
+	## Démonstration
+
+	Note:
+	demo project on branch "develop"
+</section>
+
 
 <!-- ----------
 	 related links
