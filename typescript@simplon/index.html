@@ -228,34 +228,6 @@ export class Topic {
 		</code></pre>
 	</section>
 
-	<section data-markdown>
-		##l'héritage
-```
-export class Personne {
-    constructor(public prenom: String, public nom: String) { }
-    toString(): String {
-        return this.prenom + " " + this.nom;
-    }
-}
-
-
-
-export class SuperHeros extends Personne {
-    constructor(public prenom:String, public nom:String, public superPouvoir: String) {
-        super(prenom, nom);
-    }
-    toString(): String {
-        return super.toString() + " [" + this.superPouvoir + "]";
-    }
-}
-
-const heros = new SuperHeros("Peter", "Parker", "toile d'araignée");
-console.log(heros.toString()); // => Peter Parker [toile d'araignée]
-```
-
-		Note:
-		intérêt: factorisation de comportement / attribut entre plusieurs entités ressemblantes
-	</section>
 
 </section>
 
