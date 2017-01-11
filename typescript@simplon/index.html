@@ -48,6 +48,12 @@
 			* Qui suis-je ? Que fais-je ?
 			* Mon rapport au métier de développeur
 		* TypeScript
+			* les apports de typescript
+			* how to
+			* travaux pratiques
+		
+		Note:
+		Ceci est un sommaire :)
 </section>
 
 <!-- ----------
@@ -65,7 +71,7 @@
 	<section data-markdown>
 		<script type="text/template">
 		## Pour qui ?
-		* mes employeurs: SSII vs éditeur
+		* mes employeurs : SSII vs éditeur
 		* projets personnels majeurs
 			* [meLe](http://mele-eusebe.rhcloud.com) (AngularJS + express)
 			* Score: appli mobile hybride (Ionic, Angular)
@@ -86,7 +92,7 @@
 	* dépasser le syndrome de l'imposteur
 	
 	Note:
-	- ++ au quotidien: le défi intellectuel quotidien
+	- ++ au quotidien : le défi intellectuel quotidien
 	- l'esprit de groupe
 	- approfondissement des méthodos de développement
 	- veille techno
@@ -102,33 +108,34 @@
 
 <section>
 	<section data-markdown>
-		##TypeScript: qu'est-ce ?
+		##TypeScript : qu'est-ce ?
 		* surensemble de javascript
 		* fortement typé
 		* le langage de prédilection pour faire de l'Angular
 		* utilisable en front-end comme en back-end
 		
-		Note: surensemble: du code purement JS fonctionne en TypeScript
+		Note: 
+		surensemble : du code purement JS fonctionne en TypeScript
 	</section>
 
 	<section data-markdown>
 		##Comment ça marche ?
 
 		vérification de type à la compilation. Exemple:
-```
-function sayHello(person: String) {
-    return "Hello, " + person;
-}
+		```
+		function sayHello(person: String) {
+			return "Hello, " + person;
+		}
 
-var user = [0, 1, 2];
+		var user = [0, 1, 2];
 
-document.body.innerHTML = sayHello(user);
-```
-```
-sayHello.ts(7,26): Supplied parameters do not match any signature of call target				
-```
+		document.body.innerHTML = sayHello(user);
+		```
+		```
+		sayHello.ts(7,26): Supplied parameters do not match any signature of call target				
+		```
 
-		bénéfice: erreurs détectées à l'écriture du code, pas à l'exécution
+		bénéfice : erreurs détectées à l'écriture du code, pas à l'exécution
 	</section>
 
 
@@ -149,7 +156,7 @@ sayHello.ts(7,26): Supplied parameters do not match any signature of call target
 		let name: string = "Niobé";
 		const list: Array&lt;number> = [1, 2, 42];
 		```
-		Notes: Banissez ~~var~~ !!
+		Notes : Bannissez ~~var~~ !!
 		
 		Préférez __const__, ou __let__ quand c'est nécessaire.
 
@@ -157,7 +164,7 @@ sayHello.ts(7,26): Supplied parameters do not match any signature of call target
 
 	<section data-markdown>
 		##les enums
-		une liste finie de valeurs possibles:
+		une liste finie de valeurs possibles :
 		```
 		enum EtatCommande {
 			EN_ATTENTE_FACTURATION,
@@ -173,7 +180,7 @@ sayHello.ts(7,26): Supplied parameters do not match any signature of call target
 	</section>
 
 	<section data-markdown>
-		##et aussi...
+		##et aussi ...
 		```
 		// any
 		let list: any[] = [1, true, "free"]; 
@@ -188,6 +195,7 @@ sayHello.ts(7,26): Supplied parameters do not match any signature of call target
 			return a > b ? a : b;
 		}
 		```
+		Note: any correspond à une variable javascript, qui peut avoir n'importe quel type (et pouvant varier au cours de son cycle de vie)
 	</section>
 
 
@@ -195,7 +203,12 @@ sayHello.ts(7,26): Supplied parameters do not match any signature of call target
 		##les classes
 		(en fait, proposé par ES6)
 		
-		![instanciate](assets/instantiateObject.png)
+		Structure un ensemble cohérent de données. Exemple : 
+		* Client (nom, prénom, âge ...)
+		* Sujet stackoverflow (question, réponses)
+		* Elément de catalogue de produits (désignation, référence, dimensions, prix unitaire ...)
+
+		Note: en POO, tout est objet
 	</section>
 	<section data-markdown>
 ```
@@ -204,28 +217,30 @@ import {Answer} from './answer';
 
 export class Topic {
 
-    question: Question;
-    answers: Answer[];
+	question: Question;
+	answers: Answer[];
 
-    constructor() {
-        this.answers = [];
-    }
+	constructor() {
+		this.answers = [];
+	}
 
-    setBest(bestAnswer: Answer) {
-        this.answers.forEach(this.markAsBest, bestAnswer);
-    }
+	setBest(bestAnswer: Answer) {
+		this.answers.forEach(this.markAsBest, bestAnswer);
+	}
 
-    private markAsBest(anyAnswer: any) {
-        anyAnswer.isBest = anyAnswer === this;
-    }
+	private markAsBest(anyAnswer: any) {
+		anyAnswer.isBest = anyAnswer === this;
+	}
 
-    getBestAnswer(): Answer {
-        const bestAnswers = this.answers.filter(answer => answer.isBest);
-        return bestAnswers.length > 0 ? bestAnswers[0] : null;
-    }
+	getBestAnswer(): Answer {
+		const bestAnswers = this.answers.filter(answer => answer.isBest);
+		return bestAnswers.length > 0 ? bestAnswers[0] : null;
+	}
 }
 ```
-		</code></pre>
+Note:
+Notez bien l'utilisation du mot-clé this pour les attributs de classe
+
 	</section>
 
 
@@ -254,8 +269,8 @@ export class Topic {
 	</section>
 	<section data-markdown>
 		##Quel IDE ?
-		* Sublime / Atom / VS Code / WebStorm (payant)... tous proposent des plugins pour typescript (import de types, auto-complétion et content assist...)
-		* ma configuration: 
+		* Sublime / Atom / VS Code / WebStorm (payant) ... tous proposent des plugins pour typescript (import de types, auto-complétion et content assist...)
+		* ma configuration : 
 			* VSCde
 			* plugins TypeScript Hero et TypeScript Importer
 			* chrome
@@ -279,12 +294,28 @@ export class Topic {
 	</section>
 
 </section>
+<section>
+	<section data-markdown>
+		## TP : préparation
+		
+		* cloner le projet starter
+			* git clone https://github.com/euZebe/typescript-webpack-starter
+			* npm install
+		* vous positionner sur la branche nombreMystere_start
+			* git checkout nombreMystere_start
 
-<section data-markdown>
-	## Démonstration
+		Note: 
+		* présenter rapidement le projet. 
+		* Rappeler la notion d'objet et expliquer Game / GameComponent
+	</section>
+	<section data-markdown>
+		## TP : implémentation
 
-	Note:
-	demo project on branch "develop"
+		* Step#1 : instancier la partie
+		* Step#2 : ajouter les actions découlant d'un clic bouton
+		* Step#3 : ajouter l'affichage du comparateur (Gagné / &uarr; / &darr;)
+		* Step#4 : ajouter l'affichage des essais
+	</section>
 </section>
 
 
@@ -294,10 +325,10 @@ export class Topic {
 
 <section data-markdown>
 	## liens utiles
-	* cette présentation: https://euzebe.github.io/talks/
-	* exemple de projet TypeScript + HTML: https://github.com/euZebe/typescript-webpack-starter
-	* Site officiel de TypeScript: https://www.typescriptlang.org/docs/tutorial.html
-	* Le bac à sable: https://www.typescriptlang.org/play/index.html
+	* cette présentation : https://euzebe.github.io/talks/
+	* exemple de projet TypeScript + HTML : https://github.com/euZebe/typescript-webpack-starter
+	* Site officiel de TypeScript : https://www.typescriptlang.org/docs/tutorial.html
+	* Le bac à sable : https://www.typescriptlang.org/play/index.html
 </section>
 
 <!-- ----------
