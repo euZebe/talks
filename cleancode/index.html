@@ -1,0 +1,323 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Introduction à TypeScript</title>
+		<link rel="icon" href="../favicon.png" />
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/night.css">
+		<link rel="stylesheet" href="css/custom.css">
+
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+<!-- ----------
+	 titre
+     ---------- -->
+<section>
+	<h2> Clean code</h2>
+</section>
+
+<!-- ----------
+	 sommaire
+     ---------- -->
+
+<section data-markdown>
+	## Sommaire
+
+	* Quelques préconisations pour du code plus propre
+	* Librairies
+
+	Note:
+
+</section>
+
+
+<!-- ----------
+	 enums
+     ---------- -->
+<section>
+	<section data-markdown>
+		```
+		public class Status {
+			public static final String PROCESSING = "PROCESSING";
+			public static final String DONE = "DONE";
+			public static final String FAILED = "FAILED";
+		}
+		```
+	</section>
+	<section data-markdown>
+		### Enumeration plutôt qu'un ensemble de constantes String
+		Un paramètre String doit pouvoir accepter tous les mots du dictionnaire (et plus encore).
+
+		Si la méthode attend une liste finie de valeurs, préférer une énumeration.
+	</section>
+</section>
+
+
+<!-- ----------
+	 methodes courtes
+     ---------- -->
+<section>
+	<section data-markdown>
+		```
+		public void createTransaction(...) {
+			// 550 lignes de code
+			em.persist(transaction);
+			// 150 lignes de code
+		}
+		```
+	</section>
+	<section data-markdown>
+		### Problèmes
+		
+		* méthode intestable
+		* objectif de la méthode difficile à identifier
+			* que fait-elle après le persist ? Probablement plus la création d'une transaction
+
+		### Préconisations
+		
+		* On trouve souvent la préco de méthodes de 10 lignes max
+			* meilleure testabilité
+			* permet le redécoupage du code en méthodes à responsabilité simple
+			* avoir éventuellement une méthode orchestrant les différentes étapes
+		* meilleur nommage des méthodes (plus simple si elles font peu de choses)
+		* pas une règle absolue ; exemple switch-case
+
+	</section>
+</section>
+
+<section>
+	<section data-markdown>
+		```
+		public Payment validatePayment(String paymentId) throws InputException {
+			log.info("validating payment " + paymentId);
+
+			PaymentImpl payment = getPayment(paymentId);
+			if (payment != null) {
+				switch (payment.getStatus()) {
+					case PENDING:
+						payment.setStatus(Status.COMPLETED);
+						if (payment.getAgreement().isDelayedCapture()) {
+							payment.getTransactions().iterator().next()
+									.setStatus(com.lyra.ecs.core.model.Transaction.Status.COMPLETED);
+						} else {
+							payment.getTransactions().iterator().next()
+									.setStatus(com.lyra.ecs.core.model.Transaction.Status.CAPTURED);
+						}
+						try {
+							paymentDao.save(payment);
+						} catch (Exception e) {
+							log.error(e.getMessage(), e);
+							throw new InputException(e.getMessage(), e);
+						}
+						break;
+					default:
+						InputException e = new InputException(
+								"cannot validate a payment with status " + payment.getStatus());
+						log.error(e.getMessage(), e);
+						throw e;
+				}
+			} else {
+				throw new InputException("payment with uuid = " + paymentId + " is null");
+			}
+			log.info("payment " + payment.getUuid() + " valid with status = " + payment.getStatus());
+			return payment;
+		}
+		```
+
+		Note:
+		* complexité cyclomatique (imbrication d'accolades)
+	</section>
+	<section data-markdown>
+		```
+		public Payment validatePayment(String paymentId) throws WebpayInputException {
+			log.info("Transbank payapp - validating payment " + paymentId);
+			// Find & check payment
+			PaymentImpl payment = getPayment(paymentId);
+			if (payment == null) {
+				throw new WebpayInputException("payment with uuid = " + paymentId + " is null"); // fail fast.
+			}
+			switch (payment.getStatus()) {
+				case PENDING:
+					markTransactionToNextStepThenSave(payment);
+					break;
+				default:
+					WebpayInputException e = new WebpayInputException(
+							"cannot validate a payment with status " + payment.getStatus());
+					log.error(e.getMessage(), e);
+					throw e;
+			}
+			log.info("Transbank payapp - payment " + payment.getUuid() + " valid with status = " + payment.getStatus());
+			return payment;
+		}
+
+		private void markTransactionToNextStepThenSave(PaymentImpl payment) throws WebpayInputException {
+			payment.setStatus(Status.COMPLETED);
+			TransactionImpl transaction = payment.getTransactions().iterator().next();
+			transaction.setStatus( //
+					payment.getAgreement().isDelayedCapture() //
+							? com.lyra.ecs.core.model.Transaction.Status.COMPLETED //
+							: com.lyra.ecs.core.model.Transaction.Status.CAPTURED //
+			);
+
+			try {
+				paymentDao.save(payment);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				throw new WebpayInputException(e.getMessage(), e);
+			}
+		}
+		```
+
+		Note:
+		* fail fast
+		* retours à la ligne avec // pour meilleur lisibilité
+		* alt + shift + M est ton ami (pour extraire une méthode)
+	</section>
+</section>
+
+<section>
+	<section data-markdown>
+		## utiliser les lambdas !
+
+		* plus proche du langage fonctionnel (de la façon dont on décrirait ce que doit faire la méthode)
+		* gymnastique pour écrire de façon plus fonctionnelle que procédurale
+	</section>
+	<section data-markdown>
+		```
+PlagesInfoResponse plagesInfoResponse = plagesService.getInfos(reference, cardNumber, testMode);
+if (plagesInfoResponse != null && plagesInfoResponse.getPlagesInfos() != null
+		&& !plagesInfoResponse.getPlagesInfos().isEmpty()) {
+	ObjectMapper mapper = new ObjectMapper();
+	try {
+		plagesInfos = mapper.writeValueAsString(plagesInfoResponse.getPlagesInfos());
+	} catch (Exception e) {
+		LOGGER.warn("Could not serialize plagesInfos to json");
+	}
+
+		```
+
+		```
+		PlagesInfoResponse plagesInfoResponse = plagesService.getInfos(reference, cardNumber, testMode);
+
+		return Option.of(plagesInfoResponse) //
+			.flatMap(response -> Option.of(response.getPlagesInfos())) //
+			.map(this::stringifyPlageInfos) //
+			.getOrElse((String) null);
+		```
+	</section>
+</section>
+
+<section>
+	<section data-markdown>
+		### écrire des tests automatisés
+
+		* limite les risques de régressions silencieuses
+		* même sur du code a priori trivial ; s'il l'est réellement, le test sera simple aussi. 
+		* utiliser Mockito pour ne tester que le périmètre de la méthode (et pas les dépendances)
+	</section>
+</section>
+
+<section>
+	<section data-markdown>
+		### libellés de commit explicites
+
+		* pour retrouver rapidement une modif...
+	</section>
+</section>
+
+<section>
+	<section data-markdown>
+		## Quelques librairies
+	</section>
+	<section data-markdown>
+		## Mockito
+	</section>
+	<section data-markdown>
+		## Retryer
+
+		```
+		// configure le retryer
+		Retryer<Consulta> retryer = RetryerBuilder.<T> newBuilder()//
+			.retryIfExceptionOfType(Exception.class) // Timeout, error 500, ProcesosClientException
+			.withAttemptTimeLimiter(AttemptTimeLimiters.fixedTimeLimit(getTimeout(), MILLISECONDS)) //
+			.withWaitStrategy(WaitStrategies.exponentialWait(1, SECONDS)) //
+			.withStopStrategy(StopStrategies.stopAfterAttempt(getNumberOfAttempts())) //
+			.build();
+
+		// exécute le code métier, avec retry si nécessaire
+		Consulta consulta = retryer.call(() -> {
+			Isrvproceso client = getClient(payment.getPaymentContext());
+			try {
+				String response = callConsult(request, client);
+				return Consulta.fromSoapEnvelope(response);
+			} catch (ProcesosMarshallingException e) {
+				throw new ProcesosClientException("procesos PayApp - Failed to marshall our request.", e);
+			}
+		});
+		```
+	</section>
+	<section data-markdown>
+		## Random beans
+
+		* en test, pour générer des beans avec des valeurs aléatoires.
+		* possibilité de spécifier les champs à valoriser aléatoirement.
+	</section>
+	<section data-markdown>
+		## State machine
+	</section>
+</section>
+
+<!-- ----------
+	 related links
+     ---------- -->
+
+<section data-markdown>
+	## liens utiles
+
+</section>
+
+<!-- ----------
+	 end
+     ---------- -->
+
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				history: true,
+
+				// More info https://github.com/hakimel/reveal.js#dependencies
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>
