@@ -210,6 +210,34 @@
 
 		Note: en POO, tout est objet
 	</section>
+
+	<section data-markdown>
+		## un peu de vocabulaire
+
+```
+class Personne { // classe
+    nom: String; // attribut
+    prenom: String; 
+
+	// constructeur avec paramètres ; permet d'instancier la classe
+    constructor(public prenom:String, public nom:String) { 
+	    this.prenom = prenom;
+	    this.nom = nom;
+	}
+
+	getFullName() : String { 
+		// accès à un attribut à l'intérieur de la classe en utilisant this.
+		// sinon le compilateur cherche une variable locale ou globale
+	    return this.prenom + " " + this.nom;
+	}
+}
+
+const navigateur = new Personne("Titouan", "Lamazou"); // instance
+```
+
+		Note: 
+		classe : sorte de contrat ; tous les objets de cette classe disposeront des mêmes attributs et méthodes
+	</section>
 	<section data-markdown>
 ```
 import {Question} from './question';
@@ -269,10 +297,10 @@ Notez bien l'utilisation du mot-clé this pour les attributs de classe
 	</section>
 	<section data-markdown>
 		##Quel IDE ?
-		* Sublime / Atom / VS Code / WebStorm (payant) ... tous proposent des plugins pour typescript (import de types, auto-complétion et content assist...)
+		* Sublime / Atom / VS Code / WebStorm (payant) ... proposent des plugins pour javascript / typescript (auto-comlétion, voire auto-import)
 		* ma configuration : 
 			* VSCde
-			* plugins TypeScript Hero et TypeScript Importer
+			* plugin TypeScript Hero
 			* chrome
 
 		Note:
@@ -311,10 +339,9 @@ Notez bien l'utilisation du mot-clé this pour les attributs de classe
 	<section data-markdown>
 		## TP : implémentation
 
-		* Step#1 : instancier la partie
-		* Step#2 : ajouter les actions découlant d'un clic bouton
-		* Step#3 : ajouter l'affichage du comparateur (Gagné / &uarr; / &darr;)
-		* Step#4 : ajouter l'affichage des essais
+		* index.ts: point d'entrée
+		* séparation modèle (game.ts) / composant (game-component.ts)
+		* webpack + .ts (+ .css) => dist/bundle.js, importé dans index.html
 	</section>
 </section>
 
