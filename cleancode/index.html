@@ -53,9 +53,9 @@
 <section data-markdown>
 	## Pourquoi du code propre ?
 
-	* Pour le rendre plus lisible, plus maintenable
-	* Pour que le coût d'ajout d'une fonctionnalité soit constant
-	* Pour être fier de ce que vous produisez
+	* lisibilité
+	* maintenabilité => coût d'ajout d'une fonctionnalité constant
+	* fierté
 
 	Note: pas de gêne à revenir (vous ou qqn d'autre) plus tard sur un code que vous avez écrit
 
@@ -67,38 +67,36 @@
      ---------- -->
 <section>
 	<section data-markdown>
-		## ...
-```
+		## quelques règles de 
+		##_clean code_
+	</section>
+	<section>
+		#1
+		<pre><code>
 public class Status {
-	public static final String PROCESSING = "PROCESSING";
-	public static final String DONE = "DONE";
-	public static final String FAILED = "FAILED";
+  public static final String PROCESSING = "PROCESSING";
+  public static final String DONE = "DONE";
+  public static final String FAILED = "FAILED";
 }
-```
+		</code></pre>
+		<ul class="left">
+		<li class="fragment">un paramètre String doit gérer tous les mots du dictionnaire
+		<li class="fragment">Liste finie ? => Enumération
 	</section>
-	<section data-markdown>
-		- Un paramètre String doit pouvoir accepter tous les mots du dictionnaire (et plus encore).
-		
-		=> Si la méthode attend une liste finie de valeurs, *préférez une énumeration*.
-	</section>
-</section>
 
 
 <!-- ----------
 	 methodes courtes
      ---------- -->
-<section>
 	<section>
-		<div data-markdown>
-		## ...
-```
+		#2
+		<pre><code>
 public void createTransaction(...) {
 	// 550 lignes de code
 	em.persist(transaction);
 	// 150 lignes de code
 }
-```
-		</div>
+		</code></pre>
 		<p class="fragment left" >
 			- méthode intestable
 		</p>
@@ -111,51 +109,52 @@ public void createTransaction(...) {
 	</section>
 
 	<section >
-		<h3> Préconisations</h3>
+		<h3> #2 - préconisations</h3>
 		<ul>
 			<li class="fragment left" >méthodes de 10 lignes max
 				<ul>
 					<li class="fragment">pas une règle absolue ; exemple switch-case, néanmoins...</li>
-					<li class="fragment" >meilleure testabilité</li>
-					<li class="fragment" >redécoupage du code en méthodes à responsabilité simple</li>
+					<li class="fragment">meilleure testabilité</li>
+					<li class="fragment">redécoupage du code en méthodes à responsabilité simple</li>
 				</ul>
 			<li class="fragment">1 seul niveau d'abstraction par méthode
 			<li class="fragment">meilleur nommage des méthodes (plus simple si elles font peu de choses)
 		</ul>
 	</section>
-</section>
 
-<section>
+
+<!-- ----------
+	 complexité cyclomatique
+     ---------- -->
 	<section data-markdown>
+		\#3
 ```
 public Payment validatePayment(String paymentId) throws InputException {
-	PaymentImpl payment = getPayment(paymentId);
-	if (payment != null) {
-		switch (payment.getStatus()) {
-			case PENDING:
-				payment.setStatus(Payment.Status.COMPLETED);
-				if (payment.getAgreement().isDelayedCapture()) {
-					payment.getTransactions().iterator().next()
-							.setStatus(Transaction.Status.COMPLETED);
-				} else {
-					payment.getTransactions().iterator().next()
-							.setStatus(Transaction.Status.CAPTURED);
-				}
-				try {
-					paymentDao.save(payment);
-				} catch (Exception e) {
-					throw new InputException(e.getMessage(), e);
-				}
-				break;
-			default:
-				throw new InputException(
-						"cannot validate a payment with status " 
-						+ payment.getStatus());
-		}
-	} else {
-		throw new InputException("payment with uuid = " + paymentId + " is null");
-	}
-	return payment;
+  PaymentImpl payment = getPayment(paymentId);
+  if (payment != null) {
+    switch (payment.getStatus()) {
+      case PENDING:
+        payment.setStatus(Payment.Status.COMPLETED);
+        if (payment.getAgreement().isDelayedCapture()) {
+          payment.getTransactions().iterator().next()
+            .setStatus(Transaction.Status.COMPLETED);
+        } else {
+          payment.getTransactions().iterator().next()
+            .setStatus(Transaction.Status.CAPTURED);
+        }
+        try {
+          paymentDao.save(payment);
+        } catch (Exception e) {
+          throw new InputException(e.getMessage(), e);
+        }
+        break;
+      default:
+        throw new InputException("cannot validate a payment with status " 
+          + payment.getStatus());
+    } else {
+      throw new InputException("payment with uuid = " + paymentId + " is null");
+    }
+    return payment;
 }
 ```
 
@@ -163,56 +162,58 @@ Note:
 * complexité cyclomatique (imbrication d'accolades)
 	</section>
 	<section data-markdown>
+		\#3 - préconisations
 ```
 public Payment validatePayment(String paymentId) throws InputException {
-	PaymentImpl payment = getPayment(paymentId);
-	if (payment == null) {
-		throw new InputException("payment with uuid = " + paymentId + " is null"); // fail fast.
-	}
-	switch (payment.getStatus()) {
-		case PENDING:
-			markTransactionToNextStepThenSave(payment);
-			break;
-		default:
-			throw new InputException(
-					"cannot validate a payment with status " 
-					+ payment.getStatus());
-	}
-	return payment;
+  PaymentImpl payment = getPayment(paymentId);
+  if (payment == null) {
+    throw new InputException("payment with uuid = " + paymentId + " is null");
+  }
+
+  switch (payment.getStatus()) {
+    case PENDING:
+      markTransactionToNextStepThenSave(payment); 
+      break;
+    default:
+      throw new InputException("cannot validate a payment with status " 
+         + payment.getStatus());
+  }
+  return payment;
 }
 ```
+Note:
+	- fail fast
+	- une instruction par case
 	</section>
 	<section data-markdown>
+		\#3 - préconisations (suite)
 ```
 private void markTransactionToNextStepThenSave(PaymentImpl payment) throws InputException {
-	payment.setStatus(Payment.Status.COMPLETED);
-	TransactionImpl transaction = payment.getTransactions().iterator().next();
+  payment.setStatus(Payment.Status.COMPLETED);
 
-	Transaction.Status nextStepStatus = 
-			payment.getAgreement().isDelayedCapture() //
-					? Transaction.Status.COMPLETED //
-					: Transaction.Status.CAPTURED //
+  Transaction.Status nextStepStatus = 
+      payment.getAgreement().isDelayedCapture() //
+          ? Transaction.Status.COMPLETED //
+          : Transaction.Status.CAPTURED;
 
-	transaction.setStatus( nextStepStatus );
+  TransactionImpl singleTransaction = payment.getTransactions().iterator().next();
+  singleTransaction.setStatus( nextStepStatus );
 
-	try {
-		paymentDao.save(payment);
-	} catch (Exception e) {
-		throw new InputException(e.getMessage(), e);
-	}
+  try {
+    paymentDao.save(payment);
+  } catch (Exception e) {
+    throw new InputException(e.getMessage(), e);
+  }
 }
 ```
 
 Note:
-* fail fast
 * retours à la ligne avec // pour meilleur lisibilité
 * alt + shift + M est ton ami (pour extraire une méthode)
 	</section>
-</section>
 
-<section>
 	<section data-markdown>
-		## utiliser les lambdas !
+		### \#4 - utilisez les streams
 
 		* plus proche du langage fonctionnel (de la façon dont on décrirait ce que doit faire la méthode)
 		* gymnastique pour écrire de façon plus fonctionnelle que procédurale
@@ -243,25 +244,28 @@ return Option.of(plagesInfoResponse) //
 	.getOrElse((String) null);
 ```
 	</section>
-</section>
 
-<section>
-	<section data-markdown>
-		### écrire des tests automatisés
+	<section>
+		<div data-markdown>
+		### \#5 - écrire des tests automatisés
 
-		* Robustesse: limite les risques de régressions silencieuses
-		* même sur du code a priori trivial ; s'il l'est réellement, le test sera simple aussi. 
-		* utiliser Mockito pour ne tester que le périmètre de la méthode (et pas les dépendances)
-		* tests bien écrits = garantie de pouvoir réécrire une méthode sans casser son comportement
-			=> Boy scout rule: "Toujours laisser un endroit dans un état meilleur que celui où vous l’avez trouvé"
+		Note:
+		* code trivial: s'il l'est réellement, le test sera simple aussi. 
+		* Boy scout rule: "Toujours laisser un endroit dans un état meilleur que celui où vous l’avez trouvé"
+		</div>
+		<ul class="left">
+		<li class="fragment"> Robustesse: limite les risques de régressions silencieuses
+		<li class="fragment"> même sur du code a priori trivial
+		<li class="fragment"> Mockito pour des tests réellement unitaires
+		<li class="fragment"> tests bien écrits = garantie de pouvoir réécrire une méthode sans casser son comportement
+		<div class="fragment">	=> Boy scout rule
+		</div>
 	</section>
-</section>
 
-<section>
 	<section data-markdown>
-		### libellés de commit explicites
+		### \#6 - libellés de commit explicites
 
-		* pour retrouver rapidement une modif...
+		pour retrouver rapidement une modif...
 	</section>
 </section>
 
@@ -269,41 +273,100 @@ return Option.of(plagesInfoResponse) //
 	<section data-markdown>
 		## Quelques librairies
 	</section>
-	<section data-markdown>
-		## Mockito
+	<section>
+		<h2> Mockito</h2>
+		<ul class="left">
+			<div class="fragment">simuler le comportement d'une dépendance, d'un objet injecté
+				<pre><code>
+@RunWith(MockitoJUnitRunner.class)
+public class PaymentControllerTest {
+  @InjectMocks
+  PaymentController paymentController;
+  @Mock
+  PaymentDao dao;
+
+  @Test(expected=PaymentNotFoundException.class)
+  public void should_throw_a_PaymentNotFoundException_when_dao_finds_no_payment() {
+    when(dao.find(anyLong())).thenReturn(null);
+    paymentController.find(42L);
+  }
+}
+				</code></pre>
+			</li>
+		</ul> 
+		
+		<div data-markdown>
+			Note:
+			* pour des tests UNITAIRES
+			* PaymentDao injecté avec @Inject dans PaymentController
+		</div>
 	</section>
 	<section data-markdown>
-		## Retryer
+		### et aussi...
+		* *spy* pour mocker seulement une méthode d'une instance
+		* *verify* pour compter le nombre d'appels à une méthode 
+	</section>
+	<section>
+		<h2> Retryer</h2>
 
-		```
-		// configure le retryer
-		Retryer<Consulta> retryer = RetryerBuilder.<T> newBuilder()//
-			.retryIfExceptionOfType(Exception.class) // Timeout, error 500, ProcesosClientException
-			.withAttemptTimeLimiter(AttemptTimeLimiters.fixedTimeLimit(getTimeout(), MILLISECONDS)) //
-			.withWaitStrategy(WaitStrategies.exponentialWait(1, SECONDS)) //
-			.withStopStrategy(StopStrategies.stopAfterAttempt(getNumberOfAttempts())) //
-			.build();
+<pre><code>
+// configure le retryer
+Retryer&lt;Consulta> retryer = RetryerBuilder.newBuilder()//
+  .retryIfExceptionOfType(Exception.class) // Timeout, error 500, ProcesosClientException
+  .withAttemptTimeLimiter(fixedTimeLimit(getTimeout(), MILLISECONDS)) //
+  .withWaitStrategy(WaitStrategies.exponentialWait(1, SECONDS)) //
+  .withStopStrategy(StopStrategies.stopAfterAttempt(getNumberOfAttempts())) //
+  .build();
 
-		// exécute le code métier, avec retry si nécessaire
-		Consulta consulta = retryer.call(() -> {
-			Isrvproceso client = getClient(payment.getPaymentContext());
-			try {
-				String response = callConsult(request, client);
-				return Consulta.fromSoapEnvelope(response);
-			} catch (ProcesosMarshallingException e) {
-				throw new ProcesosClientException("procesos PayApp - Failed to marshall our request.", e);
-			}
-		});
-		```
+// exécute le code métier, avec retry si nécessaire
+Consulta consulta = retryer.call(() -> {
+  Isrvproceso client = getClient(payment.getPaymentContext());
+  try {
+  String response = callConsult(request, client);
+    return Consulta.fromSoapEnvelope(response);
+  } catch (ProcesosMarshallingException e) {
+    throw new ProcesosClientException("procesos PayApp - Failed to marshall our request.", e);
+  }
+});
+</code></pre>	
+	
 	</section>
 	<section data-markdown>
 		## Random beans
 
-		* en test, pour générer des beans avec des valeurs aléatoires.
-		* possibilité de spécifier les champs à valoriser aléatoirement.
+		- Idéal en test
+		- pour générer des beans avec des valeurs aléatoires
+
 	</section>
+	<section>
+		<h3> un exemple</h3>
+		au lieu de 
+		<pre><code>
+Person person = new Person();
+person.setFirstName("Foo");
+person.setLastName("Bar");
+person.setEmail("foo.bar@gmail.com");
+person.setGender(Gender.MALE);
+person.setAddress(address);
+		</code></pre>
+		faites 
+		<pre><code>
+Person person = random(Person.class);
+		</code></pre>
+
+		<div class="fragment">
+			et pour des en générer plein ?
+			<pre><code>
+	Stream&lt;Person> persons = randomStreamOf(10, Person.class);
+			</code></pre>
+		</div>
+	</section>
+
 	<section data-markdown>
 		## State machine
+
+		Note:
+		TODO exemple de code Procesos
 	</section>
 </section>
 
@@ -313,6 +376,14 @@ return Option.of(plagesInfoResponse) //
 
 <section data-markdown>
 	## liens utiles
+
+	- https://github.com/benas/random-beans/
+	- http://site.mockito.org/
+	- https://github.com/oxo42/stateless4j 
+
+	Note:
+	- TODO: URL Retryer
+	- TODO: check URL StateMachine
 
 </section>
 
