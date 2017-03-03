@@ -4,7 +4,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>Introduction à TypeScript</title>
+		<title>Clean code</title>
 		<link rel="icon" href="../favicon.png" />
 
 		<link rel="stylesheet" href="css/reveal.css">
@@ -42,10 +42,22 @@
 <section data-markdown>
 	## Sommaire
 
+	* Pourquoi ?
 	* Quelques préconisations pour du code plus propre
 	* Librairies
 
 	Note:
+
+</section>
+
+<section data-markdown>
+	## Pourquoi du code propre ?
+
+	* Pour le rendre plus lisible, plus maintenable
+	* Pour que le coût d'ajout d'une fonctionnalité soit constant
+	* Pour être fier de ce que vous produisez
+
+	Note: pas de gêne à revenir (vous ou qqn d'autre) plus tard sur un code que vous avez écrit
 
 </section>
 
@@ -55,19 +67,19 @@
      ---------- -->
 <section>
 	<section data-markdown>
-		```
-		public class Status {
-			public static final String PROCESSING = "PROCESSING";
-			public static final String DONE = "DONE";
-			public static final String FAILED = "FAILED";
-		}
-		```
+		## ...
+```
+public class Status {
+	public static final String PROCESSING = "PROCESSING";
+	public static final String DONE = "DONE";
+	public static final String FAILED = "FAILED";
+}
+```
 	</section>
 	<section data-markdown>
-		### Enumeration plutôt qu'un ensemble de constantes String
-		Un paramètre String doit pouvoir accepter tous les mots du dictionnaire (et plus encore).
-
-		Si la méthode attend une liste finie de valeurs, préférer une énumeration.
+		- Un paramètre String doit pouvoir accepter tous les mots du dictionnaire (et plus encore).
+		
+		=> Si la méthode attend une liste finie de valeurs, *préférez une énumeration*.
 	</section>
 </section>
 
@@ -76,121 +88,125 @@
 	 methodes courtes
      ---------- -->
 <section>
-	<section data-markdown>
-		```
-		public void createTransaction(...) {
-			// 550 lignes de code
-			em.persist(transaction);
-			// 150 lignes de code
-		}
-		```
+	<section>
+		<div data-markdown>
+		## ...
+```
+public void createTransaction(...) {
+	// 550 lignes de code
+	em.persist(transaction);
+	// 150 lignes de code
+}
+```
+		</div>
+		<p class="fragment left" >
+			- méthode intestable
+		</p>
+		<p class="fragment left" >
+			- objectif de la méthode difficile à identifier
+		</p>
+		<p class="fragment left">
+			- Que fait-elle après le persist ? <br>   Probablement plus la création d'une transaction
+		</p>
 	</section>
-	<section data-markdown>
-		### Problèmes
-		
-		* méthode intestable
-		* objectif de la méthode difficile à identifier
-			* que fait-elle après le persist ? Probablement plus la création d'une transaction
 
-		### Préconisations
-		
-		* On trouve souvent la préco de méthodes de 10 lignes max
-			* meilleure testabilité
-			* permet le redécoupage du code en méthodes à responsabilité simple
-			* avoir éventuellement une méthode orchestrant les différentes étapes
-		* meilleur nommage des méthodes (plus simple si elles font peu de choses)
-		* pas une règle absolue ; exemple switch-case
-
+	<section >
+		<h3> Préconisations</h3>
+		<ul>
+			<li class="fragment left" >méthodes de 10 lignes max
+				<ul>
+					<li class="fragment">pas une règle absolue ; exemple switch-case, néanmoins...</li>
+					<li class="fragment" >meilleure testabilité</li>
+					<li class="fragment" >redécoupage du code en méthodes à responsabilité simple</li>
+				</ul>
+			<li class="fragment">1 seul niveau d'abstraction par méthode
+			<li class="fragment">meilleur nommage des méthodes (plus simple si elles font peu de choses)
+		</ul>
 	</section>
 </section>
 
 <section>
 	<section data-markdown>
-		```
-		public Payment validatePayment(String paymentId) throws InputException {
-			log.info("validating payment " + paymentId);
-
-			PaymentImpl payment = getPayment(paymentId);
-			if (payment != null) {
-				switch (payment.getStatus()) {
-					case PENDING:
-						payment.setStatus(Status.COMPLETED);
-						if (payment.getAgreement().isDelayedCapture()) {
-							payment.getTransactions().iterator().next()
-									.setStatus(com.lyra.ecs.core.model.Transaction.Status.COMPLETED);
-						} else {
-							payment.getTransactions().iterator().next()
-									.setStatus(com.lyra.ecs.core.model.Transaction.Status.CAPTURED);
-						}
-						try {
-							paymentDao.save(payment);
-						} catch (Exception e) {
-							log.error(e.getMessage(), e);
-							throw new InputException(e.getMessage(), e);
-						}
-						break;
-					default:
-						InputException e = new InputException(
-								"cannot validate a payment with status " + payment.getStatus());
-						log.error(e.getMessage(), e);
-						throw e;
+```
+public Payment validatePayment(String paymentId) throws InputException {
+	PaymentImpl payment = getPayment(paymentId);
+	if (payment != null) {
+		switch (payment.getStatus()) {
+			case PENDING:
+				payment.setStatus(Payment.Status.COMPLETED);
+				if (payment.getAgreement().isDelayedCapture()) {
+					payment.getTransactions().iterator().next()
+							.setStatus(Transaction.Status.COMPLETED);
+				} else {
+					payment.getTransactions().iterator().next()
+							.setStatus(Transaction.Status.CAPTURED);
 				}
-			} else {
-				throw new InputException("payment with uuid = " + paymentId + " is null");
-			}
-			log.info("payment " + payment.getUuid() + " valid with status = " + payment.getStatus());
-			return payment;
+				try {
+					paymentDao.save(payment);
+				} catch (Exception e) {
+					throw new InputException(e.getMessage(), e);
+				}
+				break;
+			default:
+				throw new InputException(
+						"cannot validate a payment with status " 
+						+ payment.getStatus());
 		}
-		```
+	} else {
+		throw new InputException("payment with uuid = " + paymentId + " is null");
+	}
+	return payment;
+}
+```
 
-		Note:
-		* complexité cyclomatique (imbrication d'accolades)
+Note:
+* complexité cyclomatique (imbrication d'accolades)
 	</section>
 	<section data-markdown>
-		```
-		public Payment validatePayment(String paymentId) throws WebpayInputException {
-			log.info("Transbank payapp - validating payment " + paymentId);
-			// Find & check payment
-			PaymentImpl payment = getPayment(paymentId);
-			if (payment == null) {
-				throw new WebpayInputException("payment with uuid = " + paymentId + " is null"); // fail fast.
-			}
-			switch (payment.getStatus()) {
-				case PENDING:
-					markTransactionToNextStepThenSave(payment);
-					break;
-				default:
-					WebpayInputException e = new WebpayInputException(
-							"cannot validate a payment with status " + payment.getStatus());
-					log.error(e.getMessage(), e);
-					throw e;
-			}
-			log.info("Transbank payapp - payment " + payment.getUuid() + " valid with status = " + payment.getStatus());
-			return payment;
-		}
+```
+public Payment validatePayment(String paymentId) throws InputException {
+	PaymentImpl payment = getPayment(paymentId);
+	if (payment == null) {
+		throw new InputException("payment with uuid = " + paymentId + " is null"); // fail fast.
+	}
+	switch (payment.getStatus()) {
+		case PENDING:
+			markTransactionToNextStepThenSave(payment);
+			break;
+		default:
+			throw new InputException(
+					"cannot validate a payment with status " 
+					+ payment.getStatus());
+	}
+	return payment;
+}
+```
+	</section>
+	<section data-markdown>
+```
+private void markTransactionToNextStepThenSave(PaymentImpl payment) throws InputException {
+	payment.setStatus(Payment.Status.COMPLETED);
+	TransactionImpl transaction = payment.getTransactions().iterator().next();
 
-		private void markTransactionToNextStepThenSave(PaymentImpl payment) throws WebpayInputException {
-			payment.setStatus(Status.COMPLETED);
-			TransactionImpl transaction = payment.getTransactions().iterator().next();
-			transaction.setStatus( //
-					payment.getAgreement().isDelayedCapture() //
-							? com.lyra.ecs.core.model.Transaction.Status.COMPLETED //
-							: com.lyra.ecs.core.model.Transaction.Status.CAPTURED //
-			);
+	Transaction.Status nextStepStatus = 
+			payment.getAgreement().isDelayedCapture() //
+					? Transaction.Status.COMPLETED //
+					: Transaction.Status.CAPTURED //
 
-			try {
-				paymentDao.save(payment);
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
-				throw new WebpayInputException(e.getMessage(), e);
-			}
-		}
-		```
+	transaction.setStatus( nextStepStatus );
 
-		Note:
-		* fail fast
-		* retours à la ligne avec // pour meilleur lisibilité
-		* alt + shift + M est ton ami (pour extraire une méthode)
+	try {
+		paymentDao.save(payment);
+	} catch (Exception e) {
+		throw new InputException(e.getMessage(), e);
+	}
+}
+```
+
+Note:
+* fail fast
+* retours à la ligne avec // pour meilleur lisibilité
+* alt + shift + M est ton ami (pour extraire une méthode)
 	</section>
 </section>
 
@@ -202,27 +218,30 @@
 		* gymnastique pour écrire de façon plus fonctionnelle que procédurale
 	</section>
 	<section data-markdown>
-		```
-PlagesInfoResponse plagesInfoResponse = plagesService.getInfos(reference, cardNumber, testMode);
-if (plagesInfoResponse != null && plagesInfoResponse.getPlagesInfos() != null
-		&& !plagesInfoResponse.getPlagesInfos().isEmpty()) {
+		au lieu de
+```
+PlagesInfoResponse plagesInfoResponse = plagesService.getInfos(...);
+if (plagesInfoResponse != null 
+	&& plagesInfoResponse.getPlagesInfos() != null 
+	&& !plagesInfoResponse.getPlagesInfos().isEmpty()) {
+
 	ObjectMapper mapper = new ObjectMapper();
 	try {
 		plagesInfos = mapper.writeValueAsString(plagesInfoResponse.getPlagesInfos());
 	} catch (Exception e) {
 		LOGGER.warn("Could not serialize plagesInfos to json");
 	}
+}
+```
+on peut écrire
+```
+PlagesInfoResponse plagesInfoResponse = plagesService.getInfos(...);
 
-		```
-
-		```
-		PlagesInfoResponse plagesInfoResponse = plagesService.getInfos(reference, cardNumber, testMode);
-
-		return Option.of(plagesInfoResponse) //
-			.flatMap(response -> Option.of(response.getPlagesInfos())) //
-			.map(this::stringifyPlageInfos) //
-			.getOrElse((String) null);
-		```
+return Option.of(plagesInfoResponse) //
+	.flatMap(response -> Option.of(response.getPlagesInfos())) //
+	.map(this::stringifyPlageInfos) //
+	.getOrElse((String) null);
+```
 	</section>
 </section>
 
@@ -230,9 +249,11 @@ if (plagesInfoResponse != null && plagesInfoResponse.getPlagesInfos() != null
 	<section data-markdown>
 		### écrire des tests automatisés
 
-		* limite les risques de régressions silencieuses
+		* Robustesse: limite les risques de régressions silencieuses
 		* même sur du code a priori trivial ; s'il l'est réellement, le test sera simple aussi. 
 		* utiliser Mockito pour ne tester que le périmètre de la méthode (et pas les dépendances)
+		* tests bien écrits = garantie de pouvoir réécrire une méthode sans casser son comportement
+			=> Boy scout rule: "Toujours laisser un endroit dans un état meilleur que celui où vous l’avez trouvé"
 	</section>
 </section>
 

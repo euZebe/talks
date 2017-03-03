@@ -1,7 +1,7 @@
 {
-  "name": "TypeScript.at.Simplon",
+  "name": "clean.code",
   "version": "1.0.0",
-  "description": "An introduction to TypeScript",
+  "description": "Quelques rappels de clean code",
   "homepage": "https://github.com/euZebe/talks",
   "main": "js/reveal.js",
   "author": {

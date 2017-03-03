@@ -1,3 +1,13 @@
+code.hljs {
+    line-height: 1;
+}
+code>.hljs {
+    line-height: 1;
+}
+code>.hljs-keyword {
+    line-height: 1;
+}
+
 section .right {
     text-align: right;
     margin-top: 100px;
@@ -5,5 +15,4 @@ section .right {
 
 section .left {
     text-align: left;
-    margin-top: 100px;
-}
+}   
