@@ -80,7 +80,7 @@ public class Status {
 }
 		</code></pre>
 		<ul class="left">
-		<li class="fragment">un paramètre String doit gérer tous les mots du dictionnaire
+		<li class="fragment">param String : potentiellement tous les mots du dictionnaire
 		<li class="fragment">Liste finie ? => Enumération
 	</section>
 
@@ -166,24 +166,23 @@ Note:
 ```
 public Payment validatePayment(String paymentId) throws InputException {
   PaymentImpl payment = getPayment(paymentId);
-  if (payment == null) {
+  if (payment == null) { // fail fast
     throw new InputException("payment with uuid = " + paymentId + " is null");
   }
 
   switch (payment.getStatus()) {
-    case PENDING:
-      markTransactionToNextStepThenSave(payment); 
+    case PENDING: 
+      markTransactionToNextStepThenSave(payment); // 1 instruction / case
       break;
     default:
-      throw new InputException("cannot validate a payment with status " 
-         + payment.getStatus());
+      throw new InputException("cannot validate a payment with status " + payment.getStatus());
   }
   return payment;
 }
 ```
 Note:
-	- fail fast
-	- une instruction par case
+- fail fast
+- une instruction par case
 	</section>
 	<section data-markdown>
 		\#3 - préconisations (suite)
@@ -329,6 +328,11 @@ Consulta consulta = retryer.call(() -> {
   }
 });
 </code></pre>	
+
+		<div data-markdown>
+			Note:
+			permet de séparer le code métier du code technique
+		</div>
 	
 	</section>
 	<section data-markdown>
@@ -362,11 +366,37 @@ Person person = random(Person.class);
 		</div>
 	</section>
 
-	<section data-markdown>
-		## State machine
+	<section>
+		<h2>State Machine</h2>
+		<img src="assets/ECS Payment status v2.png">
 
-		Note:
-		TODO exemple de code Procesos
+	</section>
+
+	<section>
+		<pre><code syle="line-height:1">
+public class PaymentAndTxStateMachine {
+  public PaymentAndTxStateMachine(State initialState) {
+    super(initialState);
+
+    configure(State.INITIALIZED) //
+      .permit(Trigger.BUYER_RESIGNS, State.ABANDONNED) //
+      .permit(Trigger.PROCESOS_AUTHORIZES_PAYMENT, State.APPROVED) //
+      .permit(Trigger.PROCESOS_ANSWERS_TX_DOES_NOT_EXIST, State.REFUSED) //
+    ;
+  
+    configure(State.APPROVED) //
+      .permit(Trigger.ECS_VALIDATES_DIRECT_PAYMENT, State.CAPTURED) //
+      .permit(Trigger.ECS_VALIDATES_DEFERRED_PAYMENT, State.PRE_AUTHORIZED) //
+      .permit(Trigger.CANCEL_SUCCEEDS, State.CANCELLED_BEFORE_ECS_VALIDATION) //
+      .permit(Trigger.ECS_VALIDATES_DEFERRED_PAYMENT_WAIT_MERCHANT_VALIDATION, State.WAITING_MERCHANT_VALIDATION) //
+    ;
+  }
+}
+
+...
+payment.fire(Trigger.PROCESOS_AUTHORIZES_PAYMENT);
+// lève une exception si le trigger n'est pas autorisé sur l'état courant
+		</code></pre>
 	</section>
 </section>
 
@@ -380,10 +410,7 @@ Person person = random(Person.class);
 	- https://github.com/benas/random-beans/
 	- http://site.mockito.org/
 	- https://github.com/oxo42/stateless4j 
-
-	Note:
-	- TODO: URL Retryer
-	- TODO: check URL StateMachine
+	- https://github.com/rholder/guava-retrying
 
 </section>
 
