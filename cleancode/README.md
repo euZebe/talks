@@ -9,3 +9,13 @@
 	* Guava-retrying
 	* Random-beans
 	* Stateless4j (state machine)
+
+### How to
+- clone the repository
+- open cleancode/index.html
+
+### Ingredients
+* made with reveal.js. 
+	* Use arrows to navigate. 
+	* Press "S" to dislay presenter mode. 
+	* More features on https://github.com/hakimel/reveal.js/
