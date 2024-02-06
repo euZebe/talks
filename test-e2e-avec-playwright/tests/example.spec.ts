@@ -1,0 +1,38 @@
+import { test, expect } from '@playwright/test';
+
+test('test', async ({ page }) => {
+  await page.goto('https://framadate.org/abc/');
+  await page.goto('https://framadate.org/abc/fr/');
+  await page.getByRole('button', { name: 'Créer un sondage' }).click();
+  await page.getByRole('menuitem', { name: 'Créer un sondage spécial' }).click();
+  await page.getByLabel('Votre nom *').click();
+  await page.getByLabel('Votre nom *').fill('blablabla');
+  await page.getByLabel('Votre nom *').press('Tab');
+  await page.getByLabel('Votre courriel *\n                        (au format nom@mail.com)').fill('blabla@bla.fr');
+  await page.getByLabel('Votre courriel *\n                        (au format nom@mail.com)').press('Tab');
+  await page.getByLabel('Titre du sondage *').fill('test playwright');
+  await page.getByRole('button', { name: 'Aller à l\'étape' }).click();
+  await page.getByLabel('Jour 1').click();
+  await page.getByRole('cell', { name: '8' }).first().click();
+  await page.getByLabel('Jour 2').click();
+  await page.getByTitle('/02/2024 - Horaire 1').click();
+  await page.getByTitle('/02/2024 - Horaire 1').fill('10h');
+  await page.getByTitle('/02/2024 - Horaire 1').press('Tab');
+  await page.getByTitle('/02/2024 - Horaire 2').fill('11h');
+  await page.getByTitle('/02/2024 - Horaire 2').press('Tab');
+  await page.getByTitle('/02/2024 - Horaire 3').fill('15h');
+  await page.getByRole('button', { name: 'Continuer' }).click();
+  await page.getByRole('button', { name: 'Créer le sondage' }).click();
+  await expect(page.getByText('× The poll was created.')).toBeVisible();
+  await expect(page.getByRole('alert')).toContainText('× The poll was created.');
+  await page.getByRole('link', { name: 'Lien public du sondage' }).click();
+  await page.getByPlaceholder('Votre nom').click();
+  await page.getByPlaceholder('Votre nom').fill('bidule');
+  await page.getByPlaceholder('Votre nom').press('Tab');
+  await page.getByTitle('Voter « oui » pour jeudi  8 février 2024 - 10h').locator('i').click();
+  await page.getByTitle('Voter « non » pour jeudi  8 février 2024 - 11h').locator('i').click();
+  await page.getByTitle('Voter « non » pour jeudi  8 février 2024 - 15h').locator('i').click();
+  await page.getByRole('button', { name: 'Enregistrer' }).click();
+  await expect(page.getByRole('alert')).toContainText('× Ajout du vote réussi');
+  await expect(page.locator('#addition')).toContainText('Somme1 votant·e');
+});
